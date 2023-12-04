@@ -1,21 +1,37 @@
-import domain.Menu;
-import domain.MenuRepository;
-import domain.Table;
-import domain.TableRepository;
+import controller.OrderRegistrationController;
+import controller.PaymentController;
+import domain.Command;
+import util.Retry;
 import view.InputView;
 import view.OutputView;
-
-import java.util.List;
 
 public class Application {
     // TODO 구현 진행
     public static void main(String[] args) {
-        final List<Table> tables = TableRepository.tables();
-        OutputView.printTables(tables);
+        OrderRegistrationController orderRegistrationController = new OrderRegistrationController();
+        PaymentController paymentController = new PaymentController();
 
-        final int tableNumber = InputView.inputTableNumber();
+        while (true) {
+            OutputView.printMainDisplay();
+            final int command = getCommand();
 
-        final List<Menu> menus = MenuRepository.menus();
-        OutputView.printMenus(menus);
+            if (command == 1) {
+                orderRegistrationController.run();
+            }
+            if (command == 2) {
+                paymentController.run();
+            }
+            if (command == 3) {
+                return;
+            }
+        }
+    }
+
+    private static int getCommand() {
+        return Retry.execute(() -> {
+            final int command = InputView.inputCommand();
+            Command.validateCommand(command);
+            return command;
+        });
     }
 }
